@@ -57,17 +57,10 @@ def inputloop():
 	while True:
 		m = Message(str(irc.recv(4096),"UTF-8", "replace"))
 		for channel in channels:
-			if channel == m.channel:
-				channelm(m)
-		if m.channel == "query":
-			query(m)
+			if channel == m.channel or m.channel == "query":
+				cprint(m)
 			
 def query(m):
-	colors(m)
-	print("{} {} {}: {}".format(m.time, m.channel, m.sender ,m.msg))
-	return 0
-
-def channelm(m):
 	colors(m)
 	print("{} {} {}: {}".format(m.time, m.channel, m.sender ,m.msg))
 	return 0
