@@ -60,7 +60,7 @@ def inputloop():
 			if channel == m.channel or m.channel == "query":
 				cprint(m)
 			
-def query(m):
+def cprint(m):
 	colors(m)
 	print("{} {} {}: {}".format(m.time, m.channel, m.sender ,m.msg))
 	return 0
