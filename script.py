@@ -15,7 +15,7 @@ nick = "kiltahuone"
 username = "kiltahuone"
 realname = "OTiT kiltahuone"
 channels = ["#otit", "#otit.2016", "#frisbeer", "#otit.kiltahuone"]
-hilights = ["tissit"]
+hilights = ["tissit", "kiltahuone"]
 
 class Message:
 	def __init__(self, data):
@@ -79,7 +79,7 @@ def colors(m):
 		else:
 			m.sender = Fore.RED + m.sender + Style.RESET_ALL
 	if m.channel == "query":
-		m.channel = Fore.BLUE + "query from" + Style.RESET_ALL
+		m.channel = Fore.CYAN + "query from" + Style.RESET_ALL
 	else:
 		m.channel = Fore.YELLOW + m.channel + Style.RESET_ALL
 
