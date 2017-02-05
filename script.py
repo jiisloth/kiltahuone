@@ -11,10 +11,10 @@ from colorama import Fore, Back, Style
 ircserver = "irc.oulu.fi"
 port = 6667
 
-nick = "kiltahuonedev"
+nick = "kiltahuone"
 username = "kiltahuone"
-realname = "kiltahuone"
-channels = ["#kiltisbottest", "#kiltisbottest2"]
+realname = "OTiT kiltahuone"
+channels = ["#otit", "#otit.2016", "#frisbeer", "#otit.kiltahuone"]
 hilights = ["tissit"]
 
 class Message:
