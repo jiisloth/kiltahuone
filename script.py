@@ -8,34 +8,39 @@ import colorama
 from colorama import Fore, Back, Style
 
 
-ircserver = "irc.elisa.fi"
+ircserver = "irc.oulu.fi"
 port = 6667
 
-nick = "kiltahuone"
+nick = "kiltahuonedev"
 username = "kiltahuone"
 realname = "kiltahuone"
 channels = ["#kiltisbottest", "#kiltisbottest2"]
-
+hilights = ["tissit"]
 
 class Message:
 	def __init__(self, data):
 		self.channel = ""
 		self.sender = ""
 		self.channel = ""
-
-		self.time = strftime("%H:%M", localtime())
+		self.msg = ""
+	
 		data = data.split()
-		if data[0] == "PING":
+		
+		self.time = strftime("%H:%M", localtime())
+		self.type = data[1]
+
+		if data[0] == "PING" or "PING" in data: 
 			irc.send ("PONG {}\r\n".format(data[1]).encode('utf-8'))
-		else:
+		if self.type == "PRIVMSG":
 			self.sender = data[0].lstrip(":").split("!")[0]
 			if data[2] == nick:
-				self.channel = "query"
-			elif data[2] == ircserver:
+				self.channel = "query"	
+			elif self.sender == ircserver:
 				self.channel = "msg form server"
 			else:
 				self.channel = data[2]
 			self.msg = " ".join(data[3:])[1:]
+		
 
 
 def connect():
@@ -53,18 +58,31 @@ def inputloop():
 		m = Message(str(irc.recv(4096),"UTF-8", "replace"))
 		for channel in channels:
 			if channel == m.channel:
-				channelm(irc, m)
+				channelm(m)
 		if m.channel == "query":
-			query(irc, m)
+			query(m)
 			
-def query(irc, m):
-	print("{} {}query from {}{}: {}{}".format(m.time, Fore.YELLOW, Fore.RED, m.sender ,Style.RESET_ALL, m.msg))
+def query(m):
+	colors(m)
+	print("{} {} {}: {}".format(m.time, m.channel, m.sender ,m.msg))
 	return 0
 
-def channelm(irc, m):
-	print("{} {}{} {}{}: {}{}".format(m.time, Fore.YELLOW, m.channel, Fore.RED, m.sender ,Style.RESET_ALL, m.msg))
-
+def channelm(m):
+	colors(m)
+	print("{} {} {}: {}".format(m.time, m.channel, m.sender ,m.msg))
 	return 0
+
+def colors(m):
+	for hilight in hilights:
+		if hilight in m.msg:
+			m.sender =  Back.YELLOW + m.sender + Style.RESET_ALL
+		else:
+			m.sender = Fore.RED + m.sender + Style.RESET_ALL
+	if m.channel == "query":
+		m.channel = Fore.BLUE + "query from" + Style.RESET_ALL
+	else:
+		m.channel = Fore.YELLOW + m.channel + Style.RESET_ALL
+
 
 if __name__ == "__main__":
 	os.system("clear")
