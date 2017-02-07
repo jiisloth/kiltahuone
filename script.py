@@ -8,10 +8,10 @@ from colorama import Fore, Back, Style
 ircserver = "irc.oulu.fi"
 port = 6667
 
-nick = "slotbot"
+nick = "kiltahuone"
 username = "kiltahuone"
 realname = "OTiT kiltahuone"
-channels = ["#otit.bottest"]
+channels = ["#otit.kiltahuone", "#frisbeer", "#otit", "#otit.2016"]
 hilights = ["tissit", nick]
 messages = []
 
@@ -76,7 +76,7 @@ def parsemsg(m):
     m.parsedmsg = textwrap.fill("{} {}: {}".format(strftime("%H:%M", m.time), m.sender, m.msg), width=columns)
     for hilight in hilights:
         if hilight in m.parsedmsg:
-            m.parsedmsg = ('\033[1m' + hilight + '\033[0m').join(m.parsedmsg.split(hilight))
+            m.parsedmsg = ('\033[1m' + Fore.RED + hilight + Style.RESET_ALL + '\033[0m').join(m.parsedmsg.split(hilight))
     sender = 0
     for char in m.sender:
         sender += ord(char)
