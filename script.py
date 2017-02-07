@@ -20,7 +20,7 @@ textColors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.MAGENTA, Fore.CYAN, Style.
               Style.BRIGHT + Fore.RED, Style.BRIGHT + Fore.GREEN, Style.BRIGHT + Fore.YELLOW,
               Style.BRIGHT + Fore.MAGENTA, Style.BRIGHT + Fore.CYAN, Style.BRIGHT + Fore.WHITE]
 
-rows, columns = 10, 50 #os.popen('stty size', 'r').read().split()
+rows, columns = os.popen('stty size', 'r').read().split()
 
 
 class Message:
@@ -156,6 +156,6 @@ def colors(m):
 
 
 if __name__ == "__main__":
-    # os.system("clear")
+    os.system("clear")
     irc = connect()
     inputloop()
