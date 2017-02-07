@@ -73,15 +73,14 @@ def inputloop():
 
 
 def parsemsg(m):
-    msg = m.msg
+    m.parsedmsg = textwrap.fill("{} {}: {}".format(strftime("%H:%M", m.time), m.sender, m.msg), width=columns)
     for hilight in hilights:
-        if hilight in msg:
-            msg = ('\033[1m' + hilight + '\033[0m').join(msg.split(hilight))
+        if hilight in m.parsedmsg:
+            m.parsedmsg = ('\033[1m' + hilight + '\033[0m').join(m.parsedmsg.split(hilight))
     sender = 0
     for char in m.sender:
         sender += ord(char)
-    sender = textColors[sender%len(textColors)] + m.sender + Style.RESET_ALL
-    m.parsedmsg = textwrap.fill("{} {}: {}".format(strftime("%H:%M", m.time), sender, msg), width=columns)
+    m.parsedmsg = (textColors[sender%len(textColors)] + m.sender + Style.RESET_ALL).join(m.parsedmsg.split(m.sender, 1))
 
 
 
@@ -130,11 +129,11 @@ def multiprint(spacing):
         if channelflag != m.channel:
             channelflag = m.channel
             if m.channel == "query":
-                screenprint += Back.BLUE + Fore.BLACK + " Query".ljust(columns) + Style.RESET_ALL + "\n"
+                screenprint += Back.BLUE + " Query".ljust(columns) + Style.RESET_ALL + "\n"
             else:
                 screenprint += bgColors[channels.index(m.channel)%len(bgColors)] + Fore.BLACK + m.channel.ljust(columns) + Style.RESET_ALL + "\n"
         screenprint += m.parsedmsg
-    print(screenprint)
+    print(screenprint, end="")
 
 
 def cprint(m):
