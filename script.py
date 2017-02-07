@@ -121,7 +121,7 @@ def checklines():
 
 def multiprint(spacing):
     channelflag = ""
-    screenprint = ""
+    screenprint = ("\033[F"*(rows+2))
     for i in range(spacing):
         screenprint += "\n"
     for m in messages:
