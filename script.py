@@ -63,13 +63,12 @@ def inputloop():
     while True:
         m = Message(str(irc.recv(4096), "UTF-8", "replace"))
 
-        for channel in channels:
-            if channel == m.channel or m.channel == "query":
-                parsemsg(m)
-                addtolist(m)
-                spacing = checklines()
-                # cprint(m)
-                multiprint(spacing)
+        if m.channel in channels or m.channel == "query":
+            parsemsg(m)
+            addtolist(m)
+            spacing = checklines()
+            # cprint(m)
+            multiprint(spacing)
 
 
 def parsemsg(m):
@@ -80,7 +79,7 @@ def parsemsg(m):
     sender = 0
     for char in m.sender:
         sender += ord(char)
-    m.parsedmsg = (textColors[sender%len(textColors)] + m.sender + Style.RESET_ALL).join(m.parsedmsg.split(m.sender, 1))
+    m.parsedmsg = (textColors[sender % len(textColors)] + m.sender + Style.RESET_ALL).join(m.parsedmsg.split(m.sender, 1))
 
 
 
