@@ -20,8 +20,8 @@ textColors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.MAGENTA, Fore.CYAN, Style.
               Style.BRIGHT + Fore.RED, Style.BRIGHT + Fore.GREEN, Style.BRIGHT + Fore.YELLOW,
               Style.BRIGHT + Fore.MAGENTA, Style.BRIGHT + Fore.CYAN, Style.BRIGHT + Fore.WHITE]
 
-rows, columns = os.popen('stty size', 'r').read().split()
-
+rows = int(os.popen('stty size', 'r').read().split()[0])
+columns = int(os.popen('stty size', 'r').read().split()[1])
 
 class Message:
     def __init__(self, data):
