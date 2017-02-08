@@ -52,11 +52,14 @@ class Message:
 
 
 def connect():
+    print("Opening soceket")
     irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print("Trying to connect to ", ircserver)
     irc.connect((ircserver, port))
-
+    print("Connected")
     irc.send("USER {} a a :{}\r\n".format(username, realname).encode('utf-8'))
     irc.send("NICK {}\n".format(nick).encode('utf-8'))
+    print("Joining channels: ", ", ".join(channels))
     for channel in channels:
         irc.send("JOIN {}\n".format(channel).encode('utf-8'))
     return irc
@@ -74,7 +77,7 @@ def inputloop():
 
 
 def playsound():
-    subprocess.call(["omxplayer", "highlight.wav"], stdout=FNULL, stderr=subprocess.STDOUT)
+    subprocess.Popen(["omxplayer", "highlight.wav"], shell=True, stdin=None, stdout=None, stderr=None, close_fds=True)
 
 
 def parsemsg(m):
@@ -146,4 +149,5 @@ def multiprint(spacing):
 if __name__ == "__main__":
     os.system("clear")
     irc = connect()
+    print("Connection established ",  strftime("%H:%M", localtime()), "\n\n")
     inputloop()
