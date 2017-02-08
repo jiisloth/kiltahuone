@@ -87,7 +87,8 @@ def parsemsg(m):
             else:
                 playsound("sounds/hilight.wav")
     if m.msg in commands:
-        commands[m.msg]
+        command, args = commands[m.msg]
+        command(*args)
     sender = 0
     for char in m.sender:
         sender += ord(char)
@@ -148,7 +149,7 @@ def multiprint(spacing):
     print(screenprint, end="")
 
 
-commands = {"!oviauki": playsound("sounds/oviauki.wav")}
+commands = {"!oviauki": (playsound, ["sounds/oviauki.wav"])}
 
 
 if __name__ == "__main__":
