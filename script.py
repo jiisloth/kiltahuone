@@ -2,16 +2,17 @@ import socket
 import os
 import textwrap
 from time import strftime, localtime
-
+from subprocess import call
 from colorama import Fore, Back, Style
 
 ircserver = "irc.oulu.fi"
 port = 6667
 
-nick = "kiltahuone"
+nick = "kiltahuone2"
 username = "kiltahuone"
 realname = "OTiT kiltahuone"
-channels = ["#otit.kiltahuone", "#frisbeer", "#otit", "#otit.2016"]
+#channels = ["#otit.kiltahuone", "#frisbeer", "#otit", "#otit.2016"]
+channels = ["#otit.bottest"]
 hilights = ["tissit", nick]
 messages = []
 
@@ -70,11 +71,14 @@ def inputloop():
             # cprint(m)
             multiprint(spacing)
 
+def playsound():
+    call(["omxplayer", "highlight.wav"])
 
 def parsemsg(m):
     m.parsedmsg = textwrap.fill("{} {}: {}".format(strftime("%H:%M", m.time), m.sender, m.msg), width=columns)
     for hilight in hilights:
         if hilight in m.parsedmsg:
+            playsound()
             m.parsedmsg = ('\033[1m' + Fore.RED + hilight + Style.RESET_ALL + '\033[0m').join(m.parsedmsg.split(hilight))
     sender = 0
     for char in m.sender:
