@@ -35,6 +35,8 @@ class Message:
 
         data = data.split()
 
+        self.test = data
+
         self.time = localtime()
         self.type = data[1]
 
@@ -65,6 +67,8 @@ def connect():
 def inputloop():
     while True:
         m = Message(str(irc.recv(4096), "UTF-8", "replace"))
+        if "PING" not in m.test or m.type != "PRIVMSG":
+            print(m.test)
 
         if m.channel in channels or m.channel == "query":
             parsemsg(m)
@@ -73,16 +77,21 @@ def inputloop():
             multiprint(spacing)
 
 
-def playsound():
-    subprocess.Popen(["omxplayer", "highlight.wav"], stdin=None, stdout=FNULL, stderr=subprocess.STDOUT, close_fds=True)
+def playsound(soundfile):
+    subprocess.Popen(["omxplayer", soundfile], stdin=None, stdout=FNULL, stderr=subprocess.STDOUT, close_fds=True)
+
 
 
 def parsemsg(m):
     m.parsedmsg = textwrap.fill("{} {}: {}".format(strftime("%H:%M", m.time), m.sender, m.msg), width=columns)
     for hilight in hilights:
         if hilight in m.parsedmsg:
-            playsound()
-            m.parsedmsg = ('\033[1m' + Fore.RED + hilight + Style.RESET_ALL + '\033[0m').join(m.parsedmsg.split(hilight))
+            if hilight == nick:
+                playsound("sounds/daisy.vaw")
+            elif hilight == "!oviauki":
+                playsound("sounds/oviauki.vaw")
+    if m.msg in commands:
+        commands[m.msg]
     sender = 0
     for char in m.sender:
         sender += ord(char)
@@ -141,6 +150,9 @@ def multiprint(spacing):
                 screenprint += bgColors[channels.index(m.channel)%len(bgColors)] + Fore.BLACK + m.channel.ljust(columns) + Style.RESET_ALL + "\n"
         screenprint += m.parsedmsg
     print(screenprint, end="")
+
+
+commands = {"!oviauki": playsound("sounds/oviauki.vaw")}
 
 
 if __name__ == "__main__":
