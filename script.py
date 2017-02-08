@@ -2,7 +2,7 @@ import socket
 import os
 import textwrap
 import subprocess
-from time import strftime, localtime
+from time import strftime, localtime, time
 from colorama import Fore, Back, Style
 
 ircserver = "irc.oulu.fi"
@@ -23,6 +23,8 @@ textColors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.MAGENTA, Fore.CYAN, Style.
 
 rows = int(os.popen('stty size', 'r').read().split()[0])
 columns = int(os.popen('stty size', 'r').read().split()[1])
+
+lasttime = 0
 
 FNULL = open(os.devnull, "w")
 
@@ -74,6 +76,10 @@ def inputloop():
 
 
 def playsound(soundfile):
+    global lasttime
+    if time() < lasttime + 30:
+        return
+    lasttime = time()
     subprocess.Popen(["omxplayer", soundfile], stdin=None, stdout=FNULL, stderr=subprocess.STDOUT, close_fds=True)
 
 
