@@ -1,8 +1,8 @@
 import socket
 import os
 import textwrap
+import subprocess
 from time import strftime, localtime
-from subprocess import call
 from colorama import Fore, Back, Style
 
 ircserver = "irc.oulu.fi"
@@ -23,6 +23,8 @@ textColors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.MAGENTA, Fore.CYAN, Style.
 
 rows = int(os.popen('stty size', 'r').read().split()[0])
 columns = int(os.popen('stty size', 'r').read().split()[1])
+
+FNULL = open(os.devnull, "w")
 
 class Message:
     def __init__(self, data):
@@ -68,11 +70,12 @@ def inputloop():
             parsemsg(m)
             addtolist(m)
             spacing = checklines()
-            # cprint(m)
             multiprint(spacing)
 
+
 def playsound():
-    call(["omxplayer", "highlight.wav"])
+    subprocess.call(["omxplayer", "highlight.wav"], stdout=FNULL, stderr=subprocess.STDOUT)
+
 
 def parsemsg(m):
     m.parsedmsg = textwrap.fill("{} {}: {}".format(strftime("%H:%M", m.time), m.sender, m.msg), width=columns)
@@ -84,7 +87,6 @@ def parsemsg(m):
     for char in m.sender:
         sender += ord(char)
     m.parsedmsg = (textColors[sender % len(textColors)] + m.sender + Style.RESET_ALL).join(m.parsedmsg.split(m.sender, 1))
-
 
 
 
@@ -139,24 +141,6 @@ def multiprint(spacing):
                 screenprint += bgColors[channels.index(m.channel)%len(bgColors)] + Fore.BLACK + m.channel.ljust(columns) + Style.RESET_ALL + "\n"
         screenprint += m.parsedmsg
     print(screenprint, end="")
-
-
-def cprint(m):
-    colors(m)
-    print(textwrap.fill("{} {} {}: {}".format(strftime("%H:%M", m.time), m.channel, m.sender, m.msg), width=columns))
-    return 0
-
-
-def colors(m):
-    for hilight in hilights:
-        if hilight in m.msg:
-            m.sender = Back.YELLOW + m.sender + Style.RESET_ALL
-        else:
-            m.sender = Fore.RED + m.sender + Style.RESET_ALL
-    if m.channel == "query":
-        m.channel = Fore.CYAN + "query from" + Style.RESET_ALL
-    else:
-        m.channel = Fore.YELLOW + m.channel + Style.RESET_ALL
 
 
 if __name__ == "__main__":
