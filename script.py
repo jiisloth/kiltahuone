@@ -8,12 +8,12 @@ from colorama import Fore, Back, Style
 ircserver = "irc.oulu.fi"
 port = 6667
 
-nick = "kiltahuone2"
+nick = "kiltahuone"
 username = "kiltahuone"
 realname = "OTiT kiltahuone"
-#channels = ["#otit.kiltahuone", "#frisbeer", "#otit", "#otit.2016"]
-channels = ["#otit.bottest"]
-hilights = ["tissit", nick]
+channels = ["#otit.kiltahuone", "#frisbeer", "#otit", "#otit.2016"]
+#channels = ["#otit.bottest"]
+hilights = ["tissit", nick + ":"]
 messages = []
 
 bgColors = [Back.RED, Back.GREEN, Back.YELLOW, Back.MAGENTA, Back.CYAN, Back.WHITE]
@@ -55,7 +55,7 @@ class Message:
 
 def connect():
     irc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print("Trying to connect to ", ircserver)
+    print("Trying to connect to", ircserver)
     irc.connect((ircserver, port))
     irc.send("USER {} a a :{}\r\n".format(username, realname).encode('utf-8'))
     irc.send("NICK {}\n".format(nick).encode('utf-8'))
