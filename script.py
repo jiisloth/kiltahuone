@@ -77,16 +77,15 @@ def playsound(soundfile):
     subprocess.Popen(["omxplayer", soundfile], stdin=None, stdout=FNULL, stderr=subprocess.STDOUT, close_fds=True)
 
 
-
 def parsemsg(m):
     m.parsedmsg = textwrap.fill("{} {}: {}".format(strftime("%H:%M", m.time), m.sender, m.msg), width=columns)
     for hilight in hilights:
         if hilight in m.parsedmsg:
             m.parsedmsg = ('\033[1m' + Fore.RED + hilight + Style.RESET_ALL + '\033[0m').join(m.parsedmsg.split(hilight))
             if hilight == nick:
-                playsound("sounds/daisy.vaw")
-            elif hilight == "!oviauki":
-                playsound("sounds/oviauki.vaw")
+                playsound("sounds/daisy.wav")
+            else:
+                playsound("sounds/hilight.wav")
     if m.msg in commands:
         commands[m.msg]
     sender = 0
@@ -149,7 +148,7 @@ def multiprint(spacing):
     print(screenprint, end="")
 
 
-commands = {"!oviauki": playsound("sounds/oviauki.vaw")}
+commands = {"!oviauki": playsound("sounds/oviauki.wav")}
 
 
 if __name__ == "__main__":
