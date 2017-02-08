@@ -88,7 +88,7 @@ def parsemsg(m):
     for hilight in hilights:
         if hilight in m.parsedmsg:
             m.parsedmsg = ('\033[1m' + Fore.RED + hilight + Style.RESET_ALL + '\033[0m').join(m.parsedmsg.split(hilight))
-            if hilight == nick:
+            if hilight == nick + ":":
                 playsound("sounds/daisy.wav")
             else:
                 playsound("sounds/hilight.wav")
