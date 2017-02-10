@@ -2,27 +2,30 @@ import socket
 import os
 import textwrap
 import subprocess
-from time import strftime, localtime, time
+from time import strftime, localtime, time, sleep
 from colorama import Fore, Back, Style
 
 ircserver = "irc.oulu.fi"
 port = 6667
 
-nick = "kiltahuone"
+nick = "kiltahuone2"
 username = "kiltahuone"
 realname = "OTiT kiltahuone"
-channels = ["#otit.kiltahuone", "#frisbeer", "#otit", "#otit.2016"]
-#channels = ["#otit.bottest"]
+#channels = ["#otit.kiltahuone", "#frisbeer", "#otit", "#otit.2016"]
+channels = ["#otit.bottest"]
 hilights = ["tissit", nick + ":"]
 messages = []
+
+wait = 10
+
 
 bgColors = [Back.RED, Back.GREEN, Back.YELLOW, Back.MAGENTA, Back.CYAN, Back.WHITE]
 textColors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.MAGENTA, Fore.CYAN, Style.BRIGHT + Fore.BLUE,
               Style.BRIGHT + Fore.RED, Style.BRIGHT + Fore.GREEN, Style.BRIGHT + Fore.YELLOW,
               Style.BRIGHT + Fore.MAGENTA, Style.BRIGHT + Fore.CYAN, Style.BRIGHT + Fore.WHITE]
 
-rows = int(os.popen('stty size', 'r').read().split()[0])
-columns = int(os.popen('stty size', 'r').read().split()[1])
+rows = 20#int(os.popen('stty size', 'r').read().split()[0])
+columns = 30#int(os.popen('stty size', 'r').read().split()[1])
 
 lasttime = 0
 
@@ -35,6 +38,7 @@ class Message:
         self.msg = ""
         self.parsedmsg = ""
 
+        self.all = data
         data = data.split()
 
         self.time = localtime()
@@ -66,13 +70,26 @@ def connect():
 
 def inputloop():
     while True:
-        m = Message(str(irc.recv(4096), "UTF-8", "replace"))
+        try:
+            msgbuffer = str(irc.recv(4096), "UTF-8", "replace").splitlines()
+        except ConnectionResetError:
+            return 1
+        for msg in msgbuffer:
+            m = Message(msg)
 
-        if m.channel in channels or m.channel == "query":
-            parsemsg(m)
-            addtolist(m)
-            spacing = checklines()
-            multiprint(spacing)
+            print(m.type)
+
+            if m.type == "332":
+                print("topic found")
+            if m.type == "TOPIC":
+                print("topic get")
+
+            if m.channel in channels or m.channel == "query":
+                parsemsg(m)
+                addtolist(m)
+                spacing = checklines()
+                #multiprint(spacing)
+            print(m.all)
 
 
 def playsound(soundfile):
@@ -159,6 +176,15 @@ commands = {"!oviauki": (playsound, ["sounds/oviauki.wav"])}
 
 
 if __name__ == "__main__":
-    os.system("clear")
-    irc = connect()
-    inputloop()
+    while True:
+        #os.system("clear")
+        irc = connect()
+        error = inputloop()
+        if error == 1:
+            messages = []
+            lasttime = 0
+            print("Connection error!")
+            print("Trying again after " + str(wait) + "seconds")
+            sleep(wait)
+        else:
+            break
