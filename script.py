@@ -8,6 +8,7 @@ from time import strftime, localtime, time, sleep
 from colorama import Fore, Back, Style
 
 FNULL = open(os.devnull, "w")
+place = []
 
 
 class Message:
@@ -47,6 +48,7 @@ def connect():
 
 
 def inputloop(irc):
+    status = "connecting"
     while True:
         try:
             msgbuffer = str(irc.recv(4096), "UTF-8", "replace").splitlines()
@@ -55,8 +57,8 @@ def inputloop(irc):
         for msg in msgbuffer:
             m = Message(msg, irc)
 
-            if m.type == "JOIN":
-                print("Joined channel:", msg.split()[2].lstrip(":"))
+            if m.type == "JOIN" and status == "connecting":
+                print("\nJoined channel: " + msg.split()[2].lstrip(":"), end="")
 
             if m.type == "332":
                 topic = " ".join(msg.split()[4:]).lstrip(":")
@@ -68,13 +70,46 @@ def inputloop(irc):
                 multiprint(spacing)
 
             if (m.channel in config.channels or m.channel == "query") and config.testmode <= 1:
-                parsemsg(m)
-                addtolist(m)
-                spacing = checklines()
-                multiprint(spacing)
+                status = "connected"
+                if m.channel == config.place:
+                    placer(irc, m.msg)
+                else:
+                    parsemsg(m)
+                    addtolist(m)
+                    spacing = checklines()
+                    multiprint(spacing)
             if config.testmode >= 1:
                 print("")
                 print(msg)
+
+
+
+def placer(irc, spot):
+    spot = spot.split(" ")
+    spot[0] = spot[0].split("-")
+    spot[1] = spot[1].lower()
+    if len(spot) == 2 and len(spot[0]) == 2:
+        if spot[0][0].isdigit() and spot[0][1].isdigit():
+            if int(spot[0][0]) < config.columns and int(spot[0][1]) < config.rows:
+                if spot[1] in config.placeColors.keys():
+
+                    place[int(spot[0][1])][int(spot[0][0])] = config.placeColors[spot[1]] + " " + Style.RESET_ALL
+
+                    joinplace = []
+                    for rows in place:
+                        joinrow = "".join(rows)
+                        joinplace.append(joinrow[:])
+                    print("".join(joinplace))
+
+                    screenprint = ("\n" + "\033[F" * config.rows)
+                    screenprint += (" " * config.columns * config.rows)
+                    screenprint += ("\033[F" * config.rows)
+                    print(screenprint + "".join(joinplace) + "\033[F" * (config.rows - 1), end="")
+                else:
+                    irc.send("PRIVMSG {} :{}\n".format(config.place, "Color not good enough!!").encode('utf-8'))
+            else:
+                irc.send("PRIVMSG {} :{}\n".format(config.place, "these numbers seem to be stupid.").encode('utf-8'))
+    global placertimer
 
 
 def playsound(soundfile):
@@ -158,12 +193,23 @@ def multiprint(spacing):
                 screenprint += Back.BLUE + " Query".ljust(config.columns)[:config.columns] + Style.RESET_ALL + "\n"
             else:
                 screenprint += config.bgColors[config.channels.index(m.channel) % len(
-                    config.bgColors)] + Fore.BLACK + str(m.channel + " | " + topics[m.channel]).ljust(config.columns)[:config.columns] + Style.RESET_ALL + "\n"
+                    config.bgColors)] + Fore.BLACK + str(m.channel + " | " + topics[m.channel]).ljust(config.columns)[
+                                                     :config.columns] + Style.RESET_ALL + "\n"
         screenprint += m.parsedmsg
     print(screenprint, end="")
 
 
+def createplace():
+    for i in range(config.rows):
+        row = []
+        for j in range(config.columns):
+            row.append(" ")
+        place.append(row[:])
+
+
 if __name__ == "__main__":
+    if config.place in config.channels:
+        createplace()
     while True:
         lasttime = 0
         messages = []

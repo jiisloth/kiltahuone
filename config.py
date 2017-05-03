@@ -7,17 +7,19 @@ testmode = 0  # 0 = Normal, 1 = print all, 2 = debug prints only
 ircserver = "irc.oulu.fi"
 port = 6667
 
-nick = "kiltahuone"
-username = "kiltahuone"
+nick = "Kiltahuone"
+username = "Kiltahuone"
 realname = "OTiT kiltahuone"
-channels = ["#otit.kiltahuone", "#frisbeer", "#otit", "#otit.2016"]
+channels = ["#otit.kiltahuone", "#frisbeer", "#otit", "#otit.2016", "#otit.place"]
+place = "#otit.place"
 hilights = ["tissit", nick + ":"]
 
 wait = 10
 
 commands = {"!oviauki": ("playsound", ["sounds/oviauki.wav"])}
 
-
+placeColors = {"black": Back.BLACK, "red": Back.RED, "green": Back.GREEN, "yellow": Back.YELLOW, "blue": Back.BLUE,
+               "magenta": Back.MAGENTA, "cyan": Back.CYAN, "white": Back.WHITE}
 bgColors = [Back.RED, Back.GREEN, Back.YELLOW, Back.MAGENTA, Back.CYAN, Back.WHITE]
 textColors = [Fore.RED, Fore.GREEN, Fore.YELLOW, Fore.MAGENTA, Fore.CYAN, Style.BRIGHT + Fore.BLUE,
               Style.BRIGHT + Fore.RED, Style.BRIGHT + Fore.GREEN, Style.BRIGHT + Fore.YELLOW,
