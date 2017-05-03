@@ -87,8 +87,8 @@ def inputloop(irc):
 def placer(irc, spot):
     spot = spot.split(" ")
     spot[0] = spot[0].split("-")
-    spot[1] = spot[1].lower()
     if len(spot) == 2 and len(spot[0]) == 2:
+        spot[1] = spot[1].lower()
         if spot[0][0].isdigit() and spot[0][1].isdigit():
             if int(spot[0][0]) < config.columns and int(spot[0][1]) < config.rows:
                 if spot[1] in config.placeColors.keys():
@@ -109,7 +109,6 @@ def placer(irc, spot):
                     irc.send("PRIVMSG {} :{}\n".format(config.place, "Color not good enough!!").encode('utf-8'))
             else:
                 irc.send("PRIVMSG {} :{}\n".format(config.place, "these numbers seem to be stupid.").encode('utf-8'))
-    global placertimer
 
 
 def playsound(soundfile):
