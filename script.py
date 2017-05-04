@@ -9,6 +9,7 @@ from colorama import Fore, Back, Style
 
 FNULL = open(os.devnull, "w")
 place = []
+placers = {}
 
 
 class Message:
@@ -91,6 +92,11 @@ def placer(irc, m):
         if spot[0][0].isdigit() and spot[0][1].isdigit():
             if int(spot[0][0]) < config.columns and int(spot[0][1]) < config.rows*2:
                 if spot[1] in config.placeBC.keys():
+                    if m.sender in placers.keys():
+                        placers[m.sender] += 1
+                    else:
+                        placers[m.sender] = 1
+
                     if int(spot[0][1]) % 2 == 0:
                         place[int(int(spot[0][1])/2)][int(spot[0][0])][0] = config.placeFC[spot[1]]
                     if int(spot[0][1]) % 2 == 1:
@@ -112,6 +118,11 @@ def placer(irc, m):
                     irc.send("PRIVMSG {} :{}\n".format(config.place, "Color not good enough!!").encode('utf-8'))
             else:
                 irc.send("PRIVMSG {} :{}\n".format(config.place, "these numbers seem to be stupid.").encode('utf-8'))
+    if m.msg == "!stats":
+        stats = "\n"
+        for key in placers.keys():
+            stats += key + ": " + str(placers[key]) + "\n"
+            irc.send("PRIVMSG {} :{}\n".format(config.place, stats).encode('utf-8'))
 
 
 def playsound(soundfile):
