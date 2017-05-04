@@ -58,7 +58,7 @@ def inputloop(irc):
             m = Message(msg, irc)
 
             if m.type == "JOIN" and status == "connecting":
-                print("\nJoined channel: " + msg.split()[2].lstrip(":"), end="")
+                print("\nJoined channel: " + msg.split()[2].lstrip(":"))
 
             if m.type == "332":
                 topic = " ".join(msg.split()[4:]).lstrip(":")
@@ -72,7 +72,7 @@ def inputloop(irc):
             if (m.channel in config.channels or m.channel == "query") and config.testmode <= 1:
                 status = "connected"
                 if m.channel == config.place:
-                    placer(irc, m.msg)
+                    placer(irc, m)
                 else:
                     parsemsg(m)
                     addtolist(m)
@@ -83,28 +83,31 @@ def inputloop(irc):
                 print(msg)
 
 
-
-def placer(irc, spot):
-    spot = spot.split(" ")
+def placer(irc, m):
+    spot = m.msg.split(" ")
     spot[0] = spot[0].split("-")
     if len(spot) == 2 and len(spot[0]) == 2:
         spot[1] = spot[1].lower()
         if spot[0][0].isdigit() and spot[0][1].isdigit():
-            if int(spot[0][0]) < config.columns and int(spot[0][1]) < config.rows:
-                if spot[1] in config.placeColors.keys():
+            if int(spot[0][0]) < config.columns and int(spot[0][1]) < config.rows*2:
+                if spot[1] in config.placeBC.keys():
+                    if int(spot[0][1]) % 2 == 0:
+                        place[int(int(spot[0][1])/2)][int(spot[0][0])][0] = config.placeFC[spot[1]]
+                    if int(spot[0][1]) % 2 == 1:
+                        place[int((int(spot[0][1])-1)/2)][int(spot[0][0])][1] = config.placeBC[spot[1]]
 
-                    place[int(spot[0][1])][int(spot[0][0])] = config.placeColors[spot[1]] + " " + Style.RESET_ALL
-
-                    joinplace = []
+                    placetext = ""
                     for rows in place:
-                        joinrow = "".join(rows)
-                        joinplace.append(joinrow[:])
-                    print("".join(joinplace))
+                        row = ""
+                        for columns in rows:
+                            pixel = "".join(columns) + "\u2580" + Style.RESET_ALL
+                            row += pixel
+                        placetext += row
 
-                    screenprint = ("\n" + "\033[F" * config.rows)
+                    screenprint = ("\033[F" * config.rows)
                     screenprint += (" " * config.columns * config.rows)
                     screenprint += ("\033[F" * config.rows)
-                    print(screenprint + "".join(joinplace) + "\033[F" * (config.rows - 1), end="")
+                    print(screenprint + placetext + "\033[F" * config.rows, end="")
                 else:
                     irc.send("PRIVMSG {} :{}\n".format(config.place, "Color not good enough!!").encode('utf-8'))
             else:
@@ -202,7 +205,8 @@ def createplace():
     for i in range(config.rows):
         row = []
         for j in range(config.columns):
-            row.append(" ")
+            column = [Fore.BLACK, Back.BLACK]
+            row.append(column[:])
         place.append(row[:])
 
 
