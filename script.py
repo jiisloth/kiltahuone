@@ -98,15 +98,15 @@ def placer(irc, m):
                         placers[m.sender] = 1
 
                     if int(spot[0][1]) % 2 == 0:
-                        place[int(int(spot[0][1])/2)][int(spot[0][0])][0] = config.placeFC[spot[1]]
+                        place[int(int(spot[0][1])/2)][int(spot[0][0])][0] = config.placeBC[spot[1]]
                     if int(spot[0][1]) % 2 == 1:
-                        place[int((int(spot[0][1])-1)/2)][int(spot[0][0])][1] = config.placeBC[spot[1]]
+                        place[int((int(spot[0][1])-1)/2)][int(spot[0][0])][1] = config.placeFC[spot[1]]
 
                     placetext = ""
                     for rows in place:
                         row = ""
                         for columns in rows:
-                            pixel = "".join(columns) + "\u2580" + Style.RESET_ALL
+                            pixel = "".join(columns) + "\u2584" + Style.RESET_ALL
                             row += pixel
                         placetext += row
 
@@ -216,7 +216,7 @@ def createplace():
     for i in range(config.rows):
         row = []
         for j in range(config.columns):
-            column = [Fore.BLACK, Back.BLACK]
+            column = [Back.BLACK, Fore.BLACK]
             row.append(column[:])
         place.append(row[:])
 
