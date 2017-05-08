@@ -119,9 +119,8 @@ def placer(irc, m):
             else:
                 irc.send("PRIVMSG {} :{}\n".format(config.place, "these numbers seem to be stupid.").encode('utf-8'))
     if m.msg == "!stats":
-        stats = "\n"
-        for key in placers.keys():
-            stats += key + ": " + str(placers[key]) + "\n"
+        for key in placers:
+            stats = key + ": " + str(placers[key])
             irc.send("PRIVMSG {} :{}\n".format(config.place, stats).encode('utf-8'))
 
 
