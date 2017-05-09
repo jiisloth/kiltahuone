@@ -10,6 +10,7 @@ from colorama import Fore, Back, Style
 FNULL = open(os.devnull, "w")
 place = []
 placers = {}
+placetimer = time() - 90
 
 
 class Message:
@@ -51,6 +52,8 @@ def connect():
 def inputloop(irc):
     status = "connecting"
     while True:
+        global placetimer
+        placetimeout = False
         try:
             msgbuffer = str(irc.recv(4096), "UTF-8", "replace").splitlines()
         except ConnectionResetError:
@@ -75,6 +78,8 @@ def inputloop(irc):
                 if m.channel == config.place:
                     placer(irc, m)
                 else:
+                    status = "messaging"
+                    placetimer = time()
                     parsemsg(m)
                     addtolist(m)
                     spacing = checklines()
@@ -87,41 +92,78 @@ def inputloop(irc):
 def placer(irc, m):
     spot = m.msg.split(" ")
     spot[0] = spot[0].split("-")
-    if len(spot) == 2 and len(spot[0]) == 2:
-        spot[1] = spot[1].lower()
-        if spot[0][0].isdigit() and spot[0][1].isdigit():
-            if int(spot[0][0]) < config.columns and int(spot[0][1]) < config.rows*2:
-                if spot[1] in config.placeBC.keys():
-                    if m.sender in placers.keys():
-                        placers[m.sender] += 1
+    if len(spot[0]) == 2:
+        if len(spot) == 2:
+            spot[1] = spot[1].lower()
+            if spot[0][0].isdigit() and spot[0][1].isdigit():
+                if int(spot[0][0]) < config.columns and int(spot[0][1]) < config.rows*2:
+                    if spot[1] in config.placeBC.keys():
+                        if m.sender in placers.keys():
+                            placers[m.sender] += 1
+                        else:
+                            placers[m.sender] = 1
+
+                        if int(spot[0][1]) % 2 == 0:
+                            place[int(int(spot[0][1]) / 2)][int(spot[0][0])][0] = config.placeBC[spot[1]]
+                            place[int(int(spot[0][1]) / 2)][int(spot[0][0])][2] = m.sender
+                        if int(spot[0][1]) % 2 == 1:
+                            place[int((int(spot[0][1]) - 1) / 2)][int(spot[0][0])][1] = config.placeFC[spot[1]]
+                            place[int((int(spot[0][1]) - 1) / 2)][int(spot[0][0])][3] = m.sender
+                        printplace()
                     else:
-                        placers[m.sender] = 1
-
-                    if int(spot[0][1]) % 2 == 0:
-                        place[int(int(spot[0][1])/2)][int(spot[0][0])][0] = config.placeBC[spot[1]]
-                    if int(spot[0][1]) % 2 == 1:
-                        place[int((int(spot[0][1])-1)/2)][int(spot[0][0])][1] = config.placeFC[spot[1]]
-
-                    placetext = ""
-                    for rows in place:
-                        row = ""
-                        for columns in rows:
-                            pixel = "".join(columns) + "\u2584" + Style.RESET_ALL
-                            row += pixel
-                        placetext += row
-
-                    screenprint = ("\033[F" * config.rows)
-                    screenprint += (" " * config.columns * config.rows)
-                    screenprint += ("\033[F" * config.rows)
-                    print(screenprint + placetext + "\033[F" * config.rows, end="")
+                        sendmessage(irc, config.place, "Color not good enough!!")
                 else:
-                    irc.send("PRIVMSG {} :{}\n".format(config.place, "Color not good enough!!").encode('utf-8'))
-            else:
-                irc.send("PRIVMSG {} :{}\n".format(config.place, "these numbers seem to be stupid.").encode('utf-8'))
+                    sendmessage(irc, config.place, "these numbers seem to be stupid.")
+        elif len(spot) == 1:
+            spot = spot[0]
+            if spot[0].isdigit() and spot[1].isdigit():
+                color = "??"
+                sender = "??"
+                if int(spot[1]) % 2 == 0:
+                    color = place[int(int(spot[1]) / 2)][int(spot[0])][0]
+                    sender = place[int(int(spot[1]) / 2)][int(spot[0])][2]
+                    for ckey in config.placeBC.keys():
+                        if config.placeBC[ckey] == color:
+                            color = ckey
+                if int(spot[1]) % 2 == 1:
+                    color = place[int((int(spot[1]) - 1) / 2)][int(spot[0])][1]
+                    sender = place[int((int(spot[1]) - 1) / 2)][int(spot[0])][3]
+                    for ckey in config.placeFC.keys():
+                        if config.placeFC[ckey] == color:
+                            color = ckey
+                message = spot[0] + "-" + spot[1] + " is " + color + " and was placed by " + sender
+                sendmessage(irc, config.place, message)
     if m.msg == "!stats":
         for key in placers:
             stats = key + ": " + str(placers[key])
-            irc.send("PRIVMSG {} :{}\n".format(config.place, stats).encode('utf-8'))
+            sendmessage(irc, config.place, stats)
+    if m.msg == "!size":
+        sendmessage(irc, config.place, str(config.columns) + "x" + str(config.rows*2))
+    if m.msg == "!colors":
+        message = "Colors: " + " ".join(config.placeBC.keys())
+        sendmessage(irc, config.place, message)
+
+def sendmessage(irc, channel, message):
+    irc.send("PRIVMSG {} :{}\n".format(channel, message).encode('utf-8'))
+    sleep(0.1)
+
+
+def printplace():
+    global placetimer
+    if time() < placetimer + 90:
+        return
+    placetext = ""
+    for rows in place:
+        row = ""
+        for columns in rows:
+            pixel = "".join(columns[:2]) + "\u2584" + Style.RESET_ALL
+            row += pixel
+        placetext += row
+
+    screenprint = ("\033[F" * config.rows)
+    screenprint += (" " * config.columns * config.rows)
+    screenprint += ("\033[F" * config.rows)
+    print(screenprint + placetext + "\033[F" * config.rows, end="")
 
 
 def playsound(soundfile):
@@ -215,7 +257,7 @@ def createplace():
     for i in range(config.rows):
         row = []
         for j in range(config.columns):
-            column = [Back.BLACK, Fore.BLACK]
+            column = [Back.BLACK, Fore.BLACK, "me", "me"]
             row.append(column[:])
         place.append(row[:])
 
